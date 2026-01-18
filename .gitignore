@@ -2,6 +2,7 @@
 [Bb]in/
 [Oo]bj/
 [Oo]ut/
+.config/
 
 # Visual Studio
 .vs/
@@ -9,6 +10,9 @@
 *.suo
 *.userosscache
 *.sln.docstates
+
+# VS Code
+.vscode/
 
 # Rider
 .idea/
@@ -26,6 +30,11 @@ msbuild*.err
 *.nupkg
 **/packages/*
 !**/packages/build/
+project.lock.json
+
+# ASP.NET Core
+appsettings.Development.json
+appsettings.Local.json
 
 # Windows
 Thumbs.db
@@ -37,5 +46,5 @@ Desktop.ini
 .AppleDouble
 .LSOverride
 
-# Application settings (contains encrypted API key)
+# Application settings (legacy)
 %APPDATA%/SkillSmpQuery/

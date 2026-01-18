@@ -1,22 +1,17 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
-using SkillSmpQuery.Models;
+using SkillSmpQuery.Web.Models;
 
-namespace SkillSmpQuery.Services;
+namespace SkillSmpQuery.Web.Services;
 
 /// <summary>
 /// SkillSMP API 服務的 HTTP 實作。
 /// </summary>
-public sealed class SkillSmpService : ISkillSmpService, IDisposable
+public sealed class SkillSmpService : ISkillSmpService
 {
     private readonly HttpClient _httpClient;
     private const string BaseUrl = "https://skillsmp.com/api/v1";
     private string _apiKey = string.Empty;
-
-    public SkillSmpService()
-    {
-        _httpClient = new HttpClient();
-    }
 
     public SkillSmpService(HttpClient httpClient)
     {
@@ -152,10 +147,5 @@ public sealed class SkillSmpService : ISkillSmpService, IDisposable
                 ErrorMessage = $"無法解析 API 回應: {json}"
             };
         }
-    }
-
-    public void Dispose()
-    {
-        _httpClient.Dispose();
     }
 }

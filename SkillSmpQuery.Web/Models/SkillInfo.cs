@@ -1,4 +1,4 @@
-namespace SkillSmpQuery.Models;
+namespace SkillSmpQuery.Web.Models;
 
 /// <summary>
 /// 代表單一技能的詳細資訊。

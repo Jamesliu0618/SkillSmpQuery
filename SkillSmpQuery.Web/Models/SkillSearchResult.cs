@@ -1,4 +1,4 @@
-namespace SkillSmpQuery.Models;
+namespace SkillSmpQuery.Web.Models;
 
 /// <summary>
 /// 代表搜尋結果中的單一項目，包含技能與相關性分數。

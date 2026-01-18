@@ -1,4 +1,4 @@
-namespace SkillSmpQuery.Models;
+namespace SkillSmpQuery.Web.Models;
 
 /// <summary>
 /// 代表 API 搜尋回應的結果。

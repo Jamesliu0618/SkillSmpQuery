@@ -1,0 +1,202 @@
+@page "/"
+@using SkillSmpQuery.Wasm.Models
+@using SkillSmpQuery.Wasm.Services
+@using SkillSmpQuery.Wasm.Infrastructure
+@inject ISkillSmpService SkillService
+@inject ISettingsProvider Settings
+
+<PageTitle>SkillSMP Query</PageTitle>
+
+<div class="container mt-4">
+    <h1 class="mb-4">SkillSMP Query</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="apiKey" class="form-label">API Key</label>
+                <input type="password" class="form-control" id="apiKey" @bind="_apiKey" placeholder="Enter your API Key" />
+            </div>
+
+            <div class="mb-3">
+                <label for="query" class="form-label">Search Query</label>
+                <input type="text" class="form-control" id="query" @bind="_query" 
+                       list="searchHistory" placeholder="Enter search keywords"
+                       @onkeypress="HandleKeyPress" />
+                <datalist id="searchHistory">
+                    @foreach (var item in _searchHistory)
+                    {
+                        <option value="@item" />
+                    }
+                </datalist>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="searchMode" id="keyword" 
+                           checked="@(_searchMode == SearchMode.Keyword)"
+                           @onchange="() => _searchMode = SearchMode.Keyword" />
+                    <label class="form-check-label" for="keyword">Keyword Search</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="searchMode" id="ai"
+                           checked="@(_searchMode == SearchMode.AI)"
+                           @onchange="() => _searchMode = SearchMode.AI" />
+                    <label class="form-check-label" for="ai">AI Search</label>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" @onclick="Search" disabled="@_isSearching">
+                @if (_isSearching)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    <span>Searching...</span>
+                }
+                else
+                {
+                    <span>Search</span>
+                }
+            </button>
+
+            @if (_isSearching)
+            {
+                <button class="btn btn-secondary ms-2" @onclick="CancelSearch">Cancel</button>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @_errorMessage
+        </div>
+    }
+
+    @if (_results.Count > 0)
+    {
+        <div class="row">
+            @foreach (var result in _results)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@result.Skill.Name</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">by @result.Skill.Author</h6>
+                            <p class="card-text">@result.Skill.Description</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning text-dark">
+                                    Stars: @result.Skill.Stars
+                                </span>
+                                <span class="badge bg-info">Score: @result.Score.ToString("F2")</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="@result.Skill.SkillUrl" target="_blank" class="btn btn-sm btn-outline-primary">
+                                View Skill
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (_hasSearched && !_isSearching && string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="alert alert-info" role="alert">
+            No results found.
+        </div>
+    }
+</div>
+
+@code {
+    private string _apiKey = string.Empty;
+    private string _query = string.Empty;
+    private SearchMode _searchMode = SearchMode.Keyword;
+    private bool _isSearching = false;
+    private bool _hasSearched = false;
+    private string _errorMessage = string.Empty;
+    private List<SkillSearchResult> _results = new();
+    private List<string> _searchHistory = new();
+    private CancellationTokenSource? _cts;
+
+    private enum SearchMode { Keyword, AI }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _apiKey = await Settings.GetApiKeyAsync();
+            _searchHistory = (await Settings.GetSearchHistoryAsync()).ToList();
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Search();
+        }
+    }
+
+    private async Task Search()
+    {
+        if (string.IsNullOrWhiteSpace(_apiKey))
+        {
+            _errorMessage = "Please enter your API Key.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_query))
+        {
+            _errorMessage = "Please enter a search query.";
+            return;
+        }
+
+        _errorMessage = string.Empty;
+        _isSearching = true;
+        _hasSearched = true;
+        _results.Clear();
+
+        await Settings.SetApiKeyAsync(_apiKey);
+        await Settings.AddSearchHistoryAsync(_query);
+        _searchHistory = (await Settings.GetSearchHistoryAsync()).ToList();
+
+        SkillService.SetApiKey(_apiKey);
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            var response = _searchMode == SearchMode.Keyword
+                ? await SkillService.SearchAsync(_query, _cts.Token)
+                : await SkillService.AiSearchAsync(_query, _cts.Token);
+
+            if (response.Success)
+            {
+                _results = response.Results.ToList();
+            }
+            else
+            {
+                _errorMessage = response.ErrorMessage ?? "Unknown error occurred.";
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _errorMessage = "Search cancelled.";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _isSearching = false;
+            _cts?.Dispose();
+            _cts = null;
+        }
+    }
+
+    private void CancelSearch()
+    {
+        _cts?.Cancel();
+    }
+}

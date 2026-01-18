@@ -31,9 +31,9 @@ jobs:
     # 4. 調整 base-tag (這是關鍵)
     # Blazor WASM 在 GitHub Pages 上通常部署在 /repository-name/ 子路徑
     # 這個步驟會修改 index.html 中的 base href
-    - name: Change base-tag in index.html from / to /skill-map/
-      run: sed -i 's/<base href="\/" \/>/<base href="\/skill-map\/" \/>/g' release/wwwroot/index.html
-      # 注意：如果你的 repo 名稱不是 skill-map，請修改上面的 /skill-map/
+    - name: Change base-tag in index.html from / to /SkillSmpQuery/
+      run: sed -i 's/<base href="\/" \/>/<base href="\/SkillSmpQuery\/" \/>/g' release/wwwroot/index.html
+      # 注意：已修改為匹配 repo 名稱 SkillSmpQuery
 
     # 5. 複製 index.html 為 404.html
     # 這是為了讓 SPA 路由在 GitHub Pages 上正常運作 (重整時不會 404)

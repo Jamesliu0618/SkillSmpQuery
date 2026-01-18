@@ -14,7 +14,11 @@
         <div class="card-body">
             <div class="mb-3">
                 <label for="apiKey" class="form-label">API Key</label>
-                <input type="password" class="form-control" id="apiKey" @bind="_apiKey" placeholder="Enter your API Key" />
+                <div class="input-group">
+                    <input type="password" class="form-control" id="apiKey" @bind="_apiKey" placeholder="Enter your API Key" />
+                    <button class="btn btn-outline-secondary" type="button" @onclick="ClearApiKey" title="Clear API Key">Clear</button>
+                </div>
+                <div class="form-text text-muted">API Key is stored locally in your browser.</div>
             </div>
 
             <div class="mb-3">
@@ -198,5 +202,13 @@
     private void CancelSearch()
     {
         _cts?.Cancel();
+    }
+
+    private async Task ClearApiKey()
+    {
+        _apiKey = string.Empty;
+        await Settings.SetApiKeyAsync(string.Empty);
+        SkillService.SetApiKey(string.Empty);
+        _errorMessage = "API Key cleared.";
     }
 }

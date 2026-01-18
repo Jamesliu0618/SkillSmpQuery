@@ -4,9 +4,7 @@ using SkillSmpQuery.Wasm.Models;
 
 namespace SkillSmpQuery.Wasm.Services;
 
-/// <summary>
-/// SkillSMP API 服務的 HTTP 實作。
-/// </summary>
+/// <summary> SkillSMP API 服務的 HTTP 實作。 </summary>
 public sealed class SkillSmpService : ISkillSmpService
 {
     private readonly HttpClient _httpClient;

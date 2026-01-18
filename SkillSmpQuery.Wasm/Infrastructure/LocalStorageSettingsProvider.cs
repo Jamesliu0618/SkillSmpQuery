@@ -3,9 +3,7 @@ using System.Text.Json;
 
 namespace SkillSmpQuery.Wasm.Infrastructure;
 
-/// <summary>
-/// 使用 Browser LocalStorage 的設定儲存提供者。
-/// </summary>
+/// <summary> 使用 Browser LocalStorage 的設定儲存提供者。 </summary>
 public sealed class LocalStorageSettingsProvider : ISettingsProvider
 {
     private readonly IJSRuntime _jsRuntime;

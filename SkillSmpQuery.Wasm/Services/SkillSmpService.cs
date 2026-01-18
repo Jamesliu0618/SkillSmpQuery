@@ -10,7 +10,7 @@ namespace SkillSmpQuery.Wasm.Services;
 public sealed class SkillSmpService : ISkillSmpService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "https://skillsmp.com/api/v1";
+    private const string BaseUrl = "https://corsproxy.io/?https://skillsmp.com/api/v1";
     private string _apiKey = string.Empty;
 
     public SkillSmpService(HttpClient httpClient)

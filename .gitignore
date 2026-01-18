@@ -2,6 +2,8 @@
 [Bb]in/
 [Oo]bj/
 [Oo]ut/
+release/
+publish/
 .config/
 
 # Visual Studio
